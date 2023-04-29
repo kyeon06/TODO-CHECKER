@@ -11,6 +11,7 @@ import com.yuyun.todochecker.todo.dto.TodoDto;
 import com.yuyun.todochecker.todo.mapper.TodoMapper;
 import com.yuyun.todochecker.todo.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,5 +37,14 @@ public class TodoController {
     public ResponseEntity<ProgressDto> getDailyTodoList(@PathVariable("runDate") final String runDate){
         ProgressDto res = todoService.getDailyTodoList(runDate);
         return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    // 목록 삭제
+    @RequestMapping(value = "/{todoId}", method = RequestMethod.DELETE)
+    public ResponseEntity<String> deleteToDo(@PathVariable("todoId") final long todoId){
+        String mg = todoService.deleteTodo(todoId);
+        HttpHeaders header = new HttpHeaders();
+        header.add("Content-Type", "application/json; charset=UTF-8");
+        return new ResponseEntity<>(mg, header ,HttpStatus.OK);
     }
 }

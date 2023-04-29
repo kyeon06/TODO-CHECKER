@@ -97,4 +97,10 @@ public class TodoService {
 
         return progressDto;
     }
+
+    // 목록 삭제
+    public String deleteTodo(long todoId) {
+        this.todoRepository.deleteById(todoId);
+        return "{\"message\" : \"삭제가 완료되었습니다.\"}";
+    }
 }
