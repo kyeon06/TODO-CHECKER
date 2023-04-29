@@ -17,7 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -71,5 +75,26 @@ public class TodoService {
         Todo todo = TodoMapper.convertToModel(todoDto);
         this.todoRepository.save(todo);
         return TodoMapper.convertToDto(todo);
+    }
+
+    // 일별 목록 조회
+    public ProgressDto getDailyTodoList(String runDate){
+        SimpleDateFormat beforeFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat afterFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Date tempDate = null;
+
+        try {
+            tempDate = beforeFormat.parse(runDate);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        String reqDate = afterFormat.format(tempDate);
+
+        ProgressDto progressDto = ProgressMapper.convertToDto(progressRepository.findByRunDate(LocalDate.parse(reqDate)).get());
+
+        progressDto.setTodoList(TodoMapper.convertToDtoList(todoRepository.findByProgress(ProgressMapper.convertToModel(progressDto))));
+
+        return progressDto;
     }
 }

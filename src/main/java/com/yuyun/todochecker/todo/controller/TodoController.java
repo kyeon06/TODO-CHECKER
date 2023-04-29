@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.yuyun.todochecker.todo.domain.Label;
 import com.yuyun.todochecker.todo.domain.Todo;
 import com.yuyun.todochecker.todo.dto.PostRequestDto;
+import com.yuyun.todochecker.todo.dto.ProgressDto;
 import com.yuyun.todochecker.todo.dto.TodoDto;
 import com.yuyun.todochecker.todo.mapper.TodoMapper;
 import com.yuyun.todochecker.todo.service.TodoService;
@@ -28,5 +29,12 @@ public class TodoController {
     public ResponseEntity<TodoDto> createToDo(@RequestBody final PostRequestDto requestDto) {
         TodoDto savedTodo = todoService.createTodo(requestDto);
         return new ResponseEntity<>(savedTodo, HttpStatus.OK);
+    }
+
+    // 일별 목록 조회
+    @RequestMapping(value = "/{runDate}", method = RequestMethod.GET)
+    public ResponseEntity<ProgressDto> getDailyTodoList(@PathVariable("runDate") final String runDate){
+        ProgressDto res = todoService.getDailyTodoList(runDate);
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 }
