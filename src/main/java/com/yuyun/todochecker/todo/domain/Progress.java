@@ -2,10 +2,13 @@ package com.yuyun.todochecker.todo.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,8 +23,11 @@ public class Progress {
     private Long progressId;
 
     @Column(name = "run_date")
-    private Date runDate;
+    private LocalDate runDate;
 
     @Column(name = "run_rate")
-    private int runRate;
+    private Long runRate;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "progress", cascade = CascadeType.ALL)
+    private List<Todo> todoList;
 }

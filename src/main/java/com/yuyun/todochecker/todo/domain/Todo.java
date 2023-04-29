@@ -1,12 +1,14 @@
 package com.yuyun.todochecker.todo.domain;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -23,24 +25,24 @@ public class Todo {
     @Column(name = "content")
     private String content;
 
-    @Column(name = "status")
-    private boolean status;
+    @Column(name = "status", nullable = false)
+    private Boolean status;
 
-    @Column(name = "importance")
-    private boolean importance;
+    @Column(name = "importance", nullable = false)
+    private Boolean importance;
 
     @Column(name = "created_at")
-    private Date createdAt;
+    private LocalDate createdAt;
 
     @Column(name = "updated_at")
     @UpdateTimestamp
-    private Date updatedAt;
+    private LocalDate updatedAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="label_id")
     private Label label;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "progress_id")
     private Progress progress;
 
