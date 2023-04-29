@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -102,5 +103,35 @@ public class TodoService {
     public String deleteTodo(long todoId) {
         this.todoRepository.deleteById(todoId);
         return "{\"message\" : \"삭제가 완료되었습니다.\"}";
+    }
+
+    // 목록 내용 변경 및 상태 변경
+    public TodoDto updateToDo(long todoId, TodoDto todoDto) {
+        Optional<Todo> todo = this.todoRepository.findById(todoId);
+        if (todo.isEmpty()) {
+            throw new NoSuchElementException(String.format("Todo ID '%d'가 존재하지 않습니다.", todoId));
+        }
+
+        Todo updateTodo = todo.get();
+
+        // 변경 내용이 content일 경우
+        if (todoDto.getContent() != null) {
+            updateTodo.setContent(todoDto.getContent());
+        }
+
+        // 변경 내용이 상태일 경우
+        if (todoDto.getStatus() != null) {
+            updateTodo.setStatus(todoDto.getStatus());
+        }
+
+        // 변경 내용이 우선순위일 경우
+        if (todoDto.getImportance() != null) {
+            updateTodo.setImportance(todoDto.getImportance());
+        }
+
+        // 변경 내용 저장
+        Todo savedTodo = this.todoRepository.save(updateTodo);
+
+        return TodoMapper.convertToDto(savedTodo);
     }
 }

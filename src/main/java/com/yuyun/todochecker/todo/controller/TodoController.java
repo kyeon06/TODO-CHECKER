@@ -47,4 +47,11 @@ public class TodoController {
         header.add("Content-Type", "application/json; charset=UTF-8");
         return new ResponseEntity<>(mg, header ,HttpStatus.OK);
     }
+
+    // 목록 수정
+    @RequestMapping(value = "/{todoId}", method = RequestMethod.PUT)
+    public ResponseEntity<TodoDto> updateToDo(@PathVariable("todoId") final long todoId, @RequestBody final TodoDto todoDto) {
+        TodoDto res = todoService.updateToDo(todoId, todoDto);
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
 }
