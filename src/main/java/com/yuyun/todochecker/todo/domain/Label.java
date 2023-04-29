@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,4 +24,7 @@ public class Label {
 
     @Column(name = "color")
     private String labelColor;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "label")
+    private List<Todo> todoList;
 }
