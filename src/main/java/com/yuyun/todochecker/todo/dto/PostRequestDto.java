@@ -12,9 +12,7 @@ import java.time.LocalDate;
 public class PostRequestDto {
 
     private String content;
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
-    private LocalDate createdAt;
+    private String createdAt;
     private String labelTitle;
     private String labelColor;
 
