@@ -3,25 +3,21 @@ package com.yuyun.todochecker.todo.service;
 import com.yuyun.todochecker.todo.domain.Label;
 import com.yuyun.todochecker.todo.domain.Progress;
 import com.yuyun.todochecker.todo.domain.Todo;
-import com.yuyun.todochecker.todo.dto.LabelDto;
-import com.yuyun.todochecker.todo.dto.PostRequestDto;
-import com.yuyun.todochecker.todo.dto.ProgressDto;
-import com.yuyun.todochecker.todo.dto.TodoDto;
+import com.yuyun.todochecker.todo.dto.*;
 import com.yuyun.todochecker.todo.mapper.LabelMapper;
 import com.yuyun.todochecker.todo.mapper.ProgressMapper;
 import com.yuyun.todochecker.todo.mapper.TodoMapper;
 import com.yuyun.todochecker.todo.repository.LabelRepository;
 import com.yuyun.todochecker.todo.repository.ProgressRepository;
 import com.yuyun.todochecker.todo.repository.TodoRepository;
+import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -39,17 +35,33 @@ public class TodoService {
 
     // create
     public TodoDto createTodo(PostRequestDto requestDto) {
+
+        // 날짜 변환
+        SimpleDateFormat beforeFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat afterFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date tempDate = null;
+
+        String runDate = requestDto.getCreatedAt();
+
+        try {
+            tempDate = beforeFormat.parse(runDate);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        requestDto.setCreatedAt(afterFormat.format(tempDate));
+
         // Progress
         ProgressDto progressDto = new ProgressDto();
 
         // progress에 해당 날짜가 존재가 없다면 새로 저장
-        if (progressRepository.findByRunDate(requestDto.getCreatedAt()).isEmpty()){
-            progressDto.setRunDate(requestDto.getCreatedAt());
+        if (progressRepository.findByRunDate(LocalDate.parse(requestDto.getCreatedAt())).isEmpty()){
+            progressDto.setRunDate(LocalDate.parse(requestDto.getCreatedAt()));
             Progress progress = ProgressMapper.convertToModel(progressDto);
             this.progressRepository.save(progress);
         }
 
-        Optional<Progress> resProgress = progressRepository.findByRunDate(requestDto.getCreatedAt());
+        Optional<Progress> resProgress = progressRepository.findByRunDate(LocalDate.parse(requestDto.getCreatedAt()));
 
         // Label
         LabelDto labelDto = new LabelDto();
@@ -67,7 +79,7 @@ public class TodoService {
         TodoDto todoDto = new TodoDto();
 
         todoDto.setContent(requestDto.getContent());
-        todoDto.setCreatedAt(requestDto.getCreatedAt());
+        todoDto.setCreatedAt(LocalDate.parse(requestDto.getCreatedAt()));
         todoDto.setStatus(false);
         todoDto.setImportance(false);
         todoDto.setLabel(LabelMapper.convertToDto(resLabel.get()));
@@ -92,11 +104,16 @@ public class TodoService {
         }
         String reqDate = afterFormat.format(tempDate);
 
-        ProgressDto progressDto = ProgressMapper.convertToDto(progressRepository.findByRunDate(LocalDate.parse(reqDate)).get());
+        try {
+            ProgressDto progressDto = ProgressMapper.convertToDto(progressRepository.findByRunDate(LocalDate.parse(reqDate)).get());
 
-        progressDto.setTodoList(TodoMapper.convertToDtoList(todoRepository.findByProgress(ProgressMapper.convertToModel(progressDto))));
+            progressDto.setTodoList(TodoMapper.convertToDtoList(todoRepository.findByProgress(ProgressMapper.convertToModel(progressDto))));
+            return progressDto;
 
-        return progressDto;
+        } catch (NoSuchElementException e){
+           throw new NoSuchElementException();
+        }
+
     }
 
     // 목록 삭제

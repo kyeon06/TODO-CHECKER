@@ -9,11 +9,10 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class PostRequestDto {
+public class RunRateResponseDto {
 
-    private String content;
-    private String createdAt;
-    private String labelTitle;
-    private String labelColor;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+    private LocalDate runDate;
+    private Long runRate;
 }
