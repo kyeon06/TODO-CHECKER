@@ -104,14 +104,20 @@ public class TodoService {
         }
         String reqDate = afterFormat.format(tempDate);
 
-        try {
-            ProgressDto progressDto = ProgressMapper.convertToDto(progressRepository.findByRunDate(LocalDate.parse(reqDate)).get());
+        ProgressDto progressDto = new ProgressDto();
 
+        try {
+
+            // 요청 데이터가 없을 경우
+            if (progressRepository.findByRunDate((LocalDate.parse(reqDate))).isEmpty()){
+                return progressDto;
+            }
+            progressDto = ProgressMapper.convertToDto(progressRepository.findByRunDate(LocalDate.parse(reqDate)).get());
             progressDto.setTodoList(TodoMapper.convertToDtoList(todoRepository.findByProgress(ProgressMapper.convertToModel(progressDto))));
             return progressDto;
 
         } catch (NoSuchElementException e){
-           throw new NoSuchElementException();
+           throw new NoSuchElementException("값이 없습니다.");
         }
 
     }
