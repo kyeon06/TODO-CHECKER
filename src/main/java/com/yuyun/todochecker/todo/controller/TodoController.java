@@ -3,6 +3,7 @@ package com.yuyun.todochecker.todo.controller;
 import com.yuyun.todochecker.todo.dto.PostRequestDto;
 import com.yuyun.todochecker.todo.dto.ProgressDto;
 import com.yuyun.todochecker.todo.dto.TodoDto;
+import com.yuyun.todochecker.todo.dto.TodoListDto;
 import com.yuyun.todochecker.todo.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -44,6 +45,13 @@ public class TodoController {
     @RequestMapping(value = "/{todoId}", method = RequestMethod.PUT)
     public ResponseEntity<TodoDto> updateToDo(@PathVariable("todoId") final long todoId, @RequestBody final TodoDto todoDto) {
         TodoDto res = todoService.updateToDo(todoId, todoDto);
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    // 일별 목록 필터 목록 조회
+    @RequestMapping(value = "/{runDate}", method = RequestMethod.GET)
+    public ResponseEntity<TodoListDto> getFilterList(@RequestParam(value = "label") final String label) {
+        TodoListDto res = todoService.getFilter(label);
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 }
