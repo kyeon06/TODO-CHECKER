@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/todo")
 public class TodoController {
@@ -49,9 +52,9 @@ public class TodoController {
     }
 
     // 일별 목록 필터 목록 조회
-    @RequestMapping(value = "/{runDate}", method = RequestMethod.GET)
-    public ResponseEntity<TodoListDto> getFilterList(@RequestParam(value = "label") final String label) {
-        TodoListDto res = todoService.getFilter(label);
+    @RequestMapping(value = "/{runDate}/{labelId}", method = RequestMethod.GET)
+    public ResponseEntity<TodoListDto> getFilterList(@PathVariable("runDate") String runDate, @PathVariable(value = "labelId") final long label) {
+        TodoListDto res = todoService.getFilter(runDate, label);
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 }
