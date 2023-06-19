@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class TodoService {
@@ -55,25 +53,25 @@ public class TodoService {
         ProgressDto progressDto = new ProgressDto();
 
         // progress에 해당 날짜가 존재가 없다면 새로 저장
-        if (progressRepository.findByRunDate(LocalDate.parse(requestDto.getCreatedAt())).isEmpty()){
+        if (this.progressRepository.findByRunDate(LocalDate.parse(requestDto.getCreatedAt())).isEmpty()){
             progressDto.setRunDate(LocalDate.parse(requestDto.getCreatedAt()));
             Progress progress = ProgressMapper.convertToModel(progressDto);
             this.progressRepository.save(progress);
         }
 
-        Optional<Progress> resProgress = progressRepository.findByRunDate(LocalDate.parse(requestDto.getCreatedAt()));
+        Optional<Progress> resProgress = this.progressRepository.findByRunDate(LocalDate.parse(requestDto.getCreatedAt()));
 
         // Label
         LabelDto labelDto = new LabelDto();
 
-        if (labelRepository.findByLabelTitle(requestDto.getLabelTitle()).isEmpty()){
+        if (this.labelRepository.findByLabelTitle(requestDto.getLabelTitle()).isEmpty()){
             labelDto.setLabelTitle(requestDto.getLabelTitle());
             labelDto.setLabelColor(requestDto.getLabelColor());
             Label label = LabelMapper.convertToModel(labelDto);
             this.labelRepository.save(label);
         }
 
-        Optional<Label> resLabel = labelRepository.findByLabelTitle(requestDto.getLabelTitle());
+        Optional<Label> resLabel = this.labelRepository.findByLabelTitle(requestDto.getLabelTitle());
 
         // todo저장
         TodoDto todoDto = new TodoDto();
@@ -109,11 +107,11 @@ public class TodoService {
         try {
 
             // 요청 데이터가 없을 경우
-            if (progressRepository.findByRunDate((LocalDate.parse(reqDate))).isEmpty()){
+            if (this.progressRepository.findByRunDate((LocalDate.parse(reqDate))).isEmpty()){
                 return progressDto;
             }
-            progressDto = ProgressMapper.convertToDto(progressRepository.findByRunDate(LocalDate.parse(reqDate)).get());
-            progressDto.setTodoList(TodoMapper.convertToDtoList(todoRepository.findByProgress(ProgressMapper.convertToModel(progressDto))));
+            progressDto = ProgressMapper.convertToDto(this.progressRepository.findByRunDate(LocalDate.parse(reqDate)).get());
+            progressDto.setTodoList(TodoMapper.convertToDtoList(this.todoRepository.findByProgress(ProgressMapper.convertToModel(progressDto))));
             return progressDto;
 
         } catch (NoSuchElementException e){
@@ -156,5 +154,33 @@ public class TodoService {
         Todo savedTodo = this.todoRepository.save(updateTodo);
 
         return TodoMapper.convertToDto(savedTodo);
+    }
+
+    public TodoListDto getFilter(String runDate, Long labelId) {
+        SimpleDateFormat beforeFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat afterFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Date tempDate = null;
+
+        try {
+            tempDate = beforeFormat.parse(runDate);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        String reqDate = afterFormat.format(tempDate);
+
+        ProgressDto progressDto = ProgressMapper.convertToDto(progressRepository.findByRunDate(LocalDate.parse(reqDate)).get());
+
+        List<TodoDto> result = new ArrayList<>();
+
+        TodoListDto todoListDto = new TodoListDto();
+        for (TodoDto todo : TodoMapper.convertToDtoList(this.todoRepository.findByProgress(ProgressMapper.convertToModel(progressDto)))) {
+            if (todo.getLabel().getLabelId().equals(labelId)) {
+                result.add(todo);
+            }
+        }
+        todoListDto.setTodoList(result);
+
+        return todoListDto;
     }
 }
